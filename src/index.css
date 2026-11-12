@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap');
+@import 'tailwindcss';
+
+:root {
+  --sea-deep: #043047;
+  --sea: #0a5f7a;
+  --sea-mid: #1a8aa8;
+  --foam: #e7f6fa;
+  --sun: #ffc43a;
+  --citrus: #b8f000;
+  --ink: #042433;
+  --muted: #3d6575;
+  --panel: rgba(255, 255, 255, 0.78);
+  --panel-strong: rgba(255, 255, 255, 0.92);
+  --danger: #ff5c5c;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Sora', sans-serif;
+  color: var(--ink);
+  background: var(--foam);
+  font-family: var(--font-body);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 90% 60% at 10% -10%, #ffd76a 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 0%, #7ad7ef 0%, transparent 50%),
+    linear-gradient(165deg, #e8f7fb 0%, #c8e8f0 40%, #9fd0e0 100%);
+  background-attachment: fixed;
+}
+
+button,
+input,
+label {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.meter-glow {
+  box-shadow:
+    0 0 0 1px rgba(255, 196, 58, 0.35),
+    0 12px 40px rgba(10, 95, 122, 0.25);
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  pointer-events: none;
+}

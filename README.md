@@ -1,66 +1,48 @@
 # Malaga Meter
 
-Live, multi-user board for the Málaga trip: drunkness (0–10), drink counts, per-person photo/video evidence, and noon-to-noon history (Europe/Madrid). Anyone with the link can edit everything.
+Private, live multi-user board for a Málaga trip group: per-person status levels, daily counters, photo/video uploads, and noon-to-noon history (Europe/Madrid). Access requires a shared trip code.
 
 ## Free stack
 
 | Piece | Service | Cost |
 |--------|---------|------|
-| App hosting | [Cloudflare Pages](https://pages.cloudflare.com/) or [Vercel](https://vercel.com/) or [Netlify](https://netlify.com/) | Free |
+| App hosting | [GitHub Pages](https://pages.github.com/) / [Cloudflare Pages](https://pages.cloudflare.com/) / [Vercel](https://vercel.com/) / [Netlify](https://netlify.com/) | Free |
 | Database + live sync + media | [Supabase](https://supabase.com/) free project | Free |
 
-Without Supabase keys the UI runs in **local preview** mode (this browser only). Add keys for the shared live link.
+Without Supabase keys the UI runs in **local preview** mode (this browser only).
 
-Access is locked with a **shared trip code** (Supabase Auth). After setup, run `supabase/lock-down.sql` so the database rejects anonymous reads.
+## Setup
 
-## 1. Create a free Supabase project
-
-1. Sign up at [supabase.com](https://supabase.com) and create a project.
-2. Open **SQL Editor**, paste and run `supabase/schema.sql`.
-3. Confirm Storage bucket `media` exists and is **public** (Dashboard → Storage).
-4. Copy **Project URL** and **anon public** key from **Settings → API**.
-
-## 2. Configure the app
+1. Create a free Supabase project.
+2. Run `supabase/schema.sql`, then `supabase/lock-down.sql`, in the SQL Editor.
+3. Create one shared Auth user (auto-confirm) and disable public sign-ups.
+4. Confirm Storage bucket `media` exists.
+5. Copy **Project URL** and **anon/publishable** key from **Settings → API**.
 
 ```bash
 cd malaga-meter
 cp .env.example .env
-```
-
-Edit `.env`:
-
-```
-VITE_SUPABASE_URL=https://xxxx.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJ...
-```
-
-## 3. Run locally
-
-```bash
 npm install
 npm run dev
 ```
 
-## 4. Deploy and share one link
+Set in `.env`:
 
-Build:
-
-```bash
-npm run build
+```
+VITE_SUPABASE_URL=https://xxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=...
+VITE_TRIP_EMAIL=your-shared-account@email.com
 ```
 
-Deploy the `dist/` folder (or connect the Git repo) to Cloudflare Pages / Netlify / Vercel. Set the same two `VITE_` environment variables in the host dashboard, then redeploy.
+## Deploy
 
-Send friends the public URL. No accounts; open edit for everyone on the link.
+```bash
+VITE_BASE=/malaga-meter/ npm run build
+```
 
-## Behaviour
-
-- **Drunkness** slider 0–10 with labels.
-- **Drinks** +/− counters.
-- **Day cycle** resets at 12:00 Europe/Madrid; prior days remain under Previous days.
-- **Media** attaches to a person after expanding their panel (photos ≤ 8 MB, videos ≤ 40 MB on the free plan).
+Publish `dist/` (or use GitHub Pages from the `gh-pages` branch). Set the same `VITE_` variables at build time.
 
 ## Notes
 
-- The free Supabase plan includes limited storage; prefer short clips and compressed photos.
-- The link is open: treat it as a private group URL and do not post it publicly if you care about spam.
+- Prefer short clips and compressed photos on the free storage plan.
+- Keep the trip code private; it unlocks the live board for the group only.

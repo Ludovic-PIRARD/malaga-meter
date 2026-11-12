@@ -1,5 +1,3 @@
--- Malaga Meter — free Supabase schema (run once in SQL Editor)
-
 create table if not exists people (
   id text primary key,
   name text not null,
@@ -32,7 +30,6 @@ alter table people enable row level security;
 alter table daily_stats enable row level security;
 alter table media enable row level security;
 
--- Open trip board: anyone with the link can read and write
 create policy "people_public_all" on people for all using (true) with check (true);
 create policy "stats_public_all" on daily_stats for all using (true) with check (true);
 create policy "media_public_all" on media for all using (true) with check (true);
@@ -51,7 +48,6 @@ insert into people (id, name, sort_order) values
   ('ledoc', 'LeDoc', 11)
 on conflict (id) do nothing;
 
--- Storage bucket (also create via Dashboard → Storage → New bucket "media", public)
 insert into storage.buckets (id, name, public)
 values ('media', 'media', true)
 on conflict (id) do nothing;
@@ -68,6 +64,5 @@ create policy "media_storage_public_update"
 create policy "media_storage_public_delete"
   on storage.objects for delete using (bucket_id = 'media');
 
--- Realtime
 alter publication supabase_realtime add table daily_stats;
 alter publication supabase_realtime add table media;

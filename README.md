@@ -11,6 +11,8 @@ Live, multi-user board for the Málaga trip: drunkness (0–10), drink counts, p
 
 Without Supabase keys the UI runs in **local preview** mode (this browser only). Add keys for the shared live link.
 
+Access is locked with a **shared trip code** (Supabase Auth). After setup, run `supabase/lock-down.sql` so the database rejects anonymous reads.
+
 ## 1. Create a free Supabase project
 
 1. Sign up at [supabase.com](https://supabase.com) and create a project.

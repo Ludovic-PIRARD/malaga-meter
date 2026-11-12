@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Gate } from './components/Gate'
 import { Hero } from './components/Hero'
 import { HistoryStrip } from './components/HistoryStrip'
 import { PersonPanel } from './components/PersonPanel'
 import { ToastStack } from './components/ToastStack'
+import {
+  getSessionUnlocked,
+  lockBoard,
+  onAuthChange,
+} from './lib/auth'
 import { getDayKey, msUntilNextNoon } from './lib/day'
 import { PEOPLE } from './lib/people'
 import {
@@ -24,6 +30,7 @@ function blankStat(personId: string, dayKey: string): DailyStat {
 }
 
 export default function App() {
+  const [unlocked, setUnlocked] = useState<boolean | null>(null)
   const [dayKey, setDayKey] = useState(() => getDayKey())
   const [stats, setStats] = useState<DailyStat[]>([])
   const [media, setMedia] = useState<MediaItem[]>([])
@@ -31,6 +38,11 @@ export default function App() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [toasts, setToasts] = useState<ToastPayload[]>([])
   const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    void getSessionUnlocked().then(setUnlocked)
+    return onAuthChange(setUnlocked)
+  }, [])
 
   const pushToast = useCallback((message: string) => {
     const id = crypto.randomUUID()
@@ -40,25 +52,31 @@ export default function App() {
     }, 2600)
   }, [])
 
-  const refresh = useCallback(async (key = dayKey) => {
-    const board = await loadBoard(key)
-    setStats(board.stats)
-    setMedia(board.media)
-    setHistory(board.history)
-    setLoading(false)
-  }, [dayKey])
+  const refresh = useCallback(
+    async (key = dayKey) => {
+      const board = await loadBoard(key)
+      setStats(board.stats)
+      setMedia(board.media)
+      setHistory(board.history)
+      setLoading(false)
+    },
+    [dayKey],
+  )
 
   useEffect(() => {
+    if (!unlocked) return
     void refresh()
-  }, [refresh])
+  }, [refresh, unlocked])
 
   useEffect(() => {
+    if (!unlocked) return
     return subscribeBoard(dayKey, () => {
       void refresh()
     })
-  }, [dayKey, refresh])
+  }, [dayKey, refresh, unlocked])
 
   useEffect(() => {
+    if (!unlocked) return
     let timer = 0
     const schedule = () => {
       timer = window.setTimeout(() => {
@@ -71,7 +89,7 @@ export default function App() {
     }
     schedule()
     return () => window.clearTimeout(timer)
-  }, [pushToast, refresh])
+  }, [pushToast, refresh, unlocked])
 
   const byPerson = useMemo(() => {
     const map = new Map(stats.map((s) => [s.personId, s]))
@@ -127,6 +145,18 @@ export default function App() {
     pushToast('Evidence uploaded.')
   }
 
+  if (unlocked === null) {
+    return (
+      <div className="grid min-h-svh place-items-center text-[var(--muted)]">
+        Checking access…
+      </div>
+    )
+  }
+
+  if (!unlocked) {
+    return <Gate onUnlocked={() => setUnlocked(true)} />
+  }
+
   return (
     <div className="min-h-svh">
       <Hero
@@ -143,13 +173,22 @@ export default function App() {
               The crew
             </h2>
             <p className="text-[var(--muted)]">
-              Anyone can edit any meter. Expand a person to attach photos or
-              videos.
+              Anyone unlocked can edit any meter. Expand a person to attach
+              photos or videos.
             </p>
           </div>
-          {loading && (
-            <p className="text-sm text-[var(--muted)]">Syncing…</p>
-          )}
+          <div className="flex items-center gap-3">
+            {loading && (
+              <p className="text-sm text-[var(--muted)]">Syncing…</p>
+            )}
+            <button
+              type="button"
+              onClick={() => void lockBoard().then(() => setUnlocked(false))}
+              className="rounded-full border border-[var(--sea)]/30 bg-white/70 px-3 py-1.5 text-xs font-semibold text-[var(--sea-deep)]"
+            >
+              Lock
+            </button>
+          </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
